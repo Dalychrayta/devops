@@ -5,7 +5,7 @@ COPY . .
 RUN mvn -q -e -DskipTests clean package
 
 # Étape 2 : Exécuter l'application
-FROM eclipse-temurin-17-jdk
+FROM eclipse-temurin:17-jdk
 WORKDIR /app
 COPY --from=build /app/target/*.jar app.jar
 
