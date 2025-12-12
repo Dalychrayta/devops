@@ -4,10 +4,10 @@ WORKDIR /app
 COPY . .
 RUN mvn -q -e -DskipTests clean package
 
-# Étape 2 : Image légère pour exécuter l'app
-FROM eclipse-temurin:17-jdk
+# Étape 2 : Exécuter l'application
+FROM eclipse-temurin-17-jdk
 WORKDIR /app
 COPY --from=build /app/target/*.jar app.jar
 
 EXPOSE 8080
-ENTRYPOINT ["java","-jar","app.jar"]
+ENTRYPOINT ["java", "-jar", "app.jar"]
