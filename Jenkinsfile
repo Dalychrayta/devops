@@ -16,8 +16,22 @@ pipeline {
 
         stage('Build Application') {
             steps {
-                sh "chmod +x mvnw"
-                sh "./mvnw -q -DskipTests package"
+                sh 'chmod +x mvnw'
+                sh './mvnw -DskipTests package'
+            }
+        }
+
+        stage('SonarQube Analysis') {
+            steps {
+                withSonarQubeEnv('sonarqube') {
+                    sh '''
+                    ./mvnw sonar:sonar \
+                    -Dsonar.projectKey=student-management \
+                    -Dsonar.projectName=student-management \
+                    -Dsonar.host.url=http://localhost:9000 \
+                    -Dsonar.login=$SONAR_AUTH_TOKEN
+                    '''
+                }
             }
         }
 
