@@ -2,7 +2,6 @@ pipeline {
     agent any
 
     environment {
-        DOCKERHUB_CREDENTIALS = credentials('dockerhub-credentials')
         IMAGE = "medalichrayta/student-management"
     }
 
@@ -10,14 +9,15 @@ pipeline {
 
         stage('Clone') {
             steps {
-                git branch: 'main', url: 'https://github.com/Dalychrayta/devops.git'
+                git branch: 'main',
+                    url: 'https://github.com/Dalychrayta/devops.git'
             }
         }
 
         stage('Build Application') {
             steps {
                 sh 'chmod +x mvnw'
-                sh './mvnw -DskipTests package'
+                sh './mvnw -DskipTests clean package'
             }
         }
 
@@ -26,10 +26,8 @@ pipeline {
                 withSonarQubeEnv('sonarqube') {
                     sh '''
                     ./mvnw sonar:sonar \
-                    -Dsonar.projectKey=student-management \
-                    -Dsonar.projectName=student-management \
-                    -Dsonar.host.url=http://localhost:9000 \
-                    -Dsonar.login=$SONAR_AUTH_TOKEN
+                      -Dsonar.projectKey=student-management \
+                      -Dsonar.projectName=student-management
                     '''
                 }
             }
@@ -38,7 +36,7 @@ pipeline {
         stage('Build Docker Image') {
             steps {
                 script {
-                    dockerImage = docker.build("${IMAGE}:${env.BUILD_NUMBER}")
+                    dockerImage = docker.build("${IMAGE}:${BUILD_NUMBER}")
                 }
             }
         }
@@ -46,9 +44,12 @@ pipeline {
         stage('Push Docker Image') {
             steps {
                 script {
-                    docker.withRegistry('https://registry.hub.docker.com', 'dockerhub-credentials') {
+                    docker.withRegistry(
+                        'https://registry.hub.docker.com',
+                        'dockerhub-credentials'
+                    ) {
                         dockerImage.push()
-                        dockerImage.push("latest")
+                        dockerImage.push('latest')
                     }
                 }
             }
